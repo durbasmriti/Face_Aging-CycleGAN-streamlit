@@ -7,7 +7,18 @@ from PIL import Image
 import numpy as np
 import io
 import itertools
+n_epochs=100
+epoch=offset=0 
+
+decay_start_epoch=3
+input_shape = (3,40,40)
+c,img_height,img_width = input_shape
+batch_size = 100
 lr = 2e-4
+checkpoint_interval = 1
+sample_interval = 100
+lambda_cyc = 10
+lambda_id = 5
 class ResidualBlock(nn.Module):
     def __init__(self, in_features):
         super(ResidualBlock, self).__init__()
