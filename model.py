@@ -1,12 +1,12 @@
-# import streamlit as st
-# import torch
-# from torchvision import transforms
-# import torch.nn as nn
-# from torchvision.utils import save_image
-# from PIL import Image
-# import numpy as np
-# import io
-# import itertools
+import streamlit as st
+import torch
+from torchvision import transforms
+import torch.nn as nn
+from torchvision.utils import save_image
+from PIL import Image
+import numpy as np
+import io
+import itertools
 
 # input_shape = (3,40,40)
 # c,img_height,img_width = input_shape
