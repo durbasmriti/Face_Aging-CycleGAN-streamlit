@@ -7,7 +7,7 @@ from PIL import Image
 import numpy as np
 import io
 import itertools
-
+lr = 2e-4
 class ResidualBlock(nn.Module):
     def __init__(self, in_features):
         super(ResidualBlock, self).__init__()
