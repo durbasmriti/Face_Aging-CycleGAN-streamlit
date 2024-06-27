@@ -170,13 +170,13 @@ optimizer_D_A = torch.optim.Adam(D_A.parameters(), lr=lr, betas=(0.5, 0.999))
 optimizer_D_B = torch.optim.Adam(D_B.parameters(), lr=lr, betas=(0.5, 0.999))
 
 # Define transformations
-transforms_ = [
+transform_pipeline = transforms.Compose([
     transforms.Resize(int(img_height * 1.12), Image.BICUBIC),
     transforms.RandomCrop((img_height, img_width)),
     transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-]
+])
 
 st.title("Image Aging with CycleGAN")
 
