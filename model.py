@@ -114,8 +114,6 @@ class Discriminator(nn.Module):
         
 def load_models():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    input_shape = (3, 40, 40)
-
     G_AB = GeneratorResNet(input_shape, num_residual_blocks=3)
     G_BA = GeneratorResNet(input_shape, num_residual_blocks=3)
     D_A = Discriminator(input_shape)
@@ -136,6 +134,7 @@ def load_models():
 
 def transform_image(image):
     transform = transforms.Compose([
+        transforms.RandomCrop((img_height, img_width)),
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         
