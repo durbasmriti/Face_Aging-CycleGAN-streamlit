@@ -113,8 +113,8 @@ def load_models():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     input_shape = (3, 40, 40)
 
-    G_AB = GeneratorResNet(input_shape, num_residual_blocks=9).to(device)
-    G_BA = GeneratorResNet(input_shape, num_residual_blocks=9).to(device)
+    G_AB = GeneratorResNet(input_shape, num_residual_blocks=3).to(device)
+    G_BA = GeneratorResNet(input_shape, num_residual_blocks=3).to(device)
     D_A = Discriminator(input_shape).to(device)
     D_B = Discriminator(input_shape).to(device)
 
