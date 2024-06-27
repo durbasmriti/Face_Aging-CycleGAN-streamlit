@@ -11,6 +11,7 @@ import itertools
 class ResidualBlock(nn.Module):
     def __init__(self, in_features):
         super(ResidualBlock, self).__init__()
+        # Pad --> Conv2d (Same) --> IntanceNorm2d --> Relu --> Pad --> Conv2d (Same)  --> IntanceNorm2d
         self.block = nn.Sequential(
             nn.ReflectionPad2d(1),
             nn.Conv2d(in_features, in_features, 3),
@@ -22,7 +23,7 @@ class ResidualBlock(nn.Module):
         )
 
     def forward(self, x):
-        return x + self.block(x)
+        return x + self.block(x) # Adds the shortcut/bypass connection
 
 class GeneratorResNet(nn.Module):
     def __init__(self, input_shape, num_residual_blocks=9):
@@ -80,18 +81,25 @@ class GeneratorResNet(nn.Module):
 class Discriminator(nn.Module):
     def __init__(self, input_shape):
         super(Discriminator, self).__init__()
+
         channels, height, width = input_shape
+
+        # Calculate output shape of image discriminator (PatchGAN)
         self.output_shape = (1, height // 2 ** 4, width // 2 ** 4)
+
+
+
         self.model = nn.Sequential(
             *self.discriminator_block(channels, 64, normalize=False),
             *self.discriminator_block(64, 128),
             *self.discriminator_block(128, 256),
             *self.discriminator_block(256, 512),
-            nn.ZeroPad2d((1, 0, 1, 0)),
+            nn.ZeroPad2d((1, 0, 1, 0)), # 
             nn.Conv2d(512, 1, 4, padding=1)
         )
-
-    def discriminator_block(self, in_filters, out_filters, normalize=True):
+    
+    def discriminator_block(self,in_filters, out_filters, normalize=True):
+        """Returns downsampling layers of each discriminator block"""
         layers = [nn.Conv2d(in_filters, out_filters, 4, stride=2, padding=1)]
         if normalize:
             layers.append(nn.InstanceNorm2d(out_filters))
@@ -103,7 +111,7 @@ class Discriminator(nn.Module):
         
 def load_models():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    input_shape = (3, 256, 256)
+    input_shape = (3, 40, 40)
 
     G_AB = GeneratorResNet(input_shape, num_residual_blocks=9).to(device)
     G_BA = GeneratorResNet(input_shape, num_residual_blocks=9).to(device)
