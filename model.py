@@ -1,6 +1,7 @@
 import streamlit as st
 import torch
 from torchvision import transforms
+import torch.nn as nn
 from torchvision.utils import save_image
 from PIL import Image
 import numpy as np
