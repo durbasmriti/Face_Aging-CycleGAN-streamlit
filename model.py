@@ -154,11 +154,10 @@ from PIL import ImageFilter
 def sharpen_image(image):
     return image.filter(ImageFilter.SHARPEN)
 
-# Modify the part of the script where you convert the tensor back to a PIL image and save it
 def save_image_tensor(image_tensor, file_name):
     image_tensor = image_tensor.squeeze().cpu().detach()
     image = transforms.ToPILImage()(image_tensor)
-    image = sharpen_image(image)  # Apply sharpening filter
+    image = sharpen_image(image) 
     image.save(file_name)
 
 st.title('CycleGAN Age Transformation')
@@ -170,19 +169,9 @@ if uploaded_file is not None:
     st.image(image, caption='Uploaded Image', use_column_width=True)
 
     image_tensor = transform_image(image)
-    transformed_image = save_image_tensor(image_tensor)
-    buf_transformed = io.BytesIO()
-    transformed_image.save(buf_transformed, format="JPEG")
-    byte_im_transformed = buf_transformed.getvalue()
-
-    st.image(transformed_image, caption='Transformed Image', use_column_width=True)
-    st.download_button(label="Download Transformed Image", data=byte_im_transformed, file_name="transformed_image.jpg", mime="image/jpeg")
+    save_image_tensor(image_tensor, 'transformed_image.jpg')
+    st.image('transformed_image.jpg', caption='Transformed Image', use_column_width=True)
 
     fake_image_tensor = generate_image(G_AB, image_tensor)
-    aged_image = save_image_tensor(fake_image_tensor)
-    buf_aged = io.BytesIO()
-    aged_image.save(buf_aged, format="JPEG")
-    byte_im_aged = buf_aged.getvalue()
-
-    st.image(aged_image, caption='Aged Image', use_column_width=True)
-    st.download_button(label="Download Aged Image", data=byte_im_aged, file_name="aged_image.jpg", mime="image/jpeg")
+    save_image_tensor(fake_image_tensor, 'generated_image.jpg')
+    st.image('generated_image.jpg', caption='Aged Image', use_column_width=True)
