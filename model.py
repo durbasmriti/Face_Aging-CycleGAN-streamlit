@@ -186,7 +186,7 @@ if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
     st.image(image, caption='Uploaded Image', use_column_width=True)
     
-    image_tensor = transform(image).unsqueeze(0).to(device)
+    image_tensor = transforms(image).unsqueeze(0).to(device)
 
     with torch.no_grad():
         aged_image_tensor = G_AB(image_tensor)
