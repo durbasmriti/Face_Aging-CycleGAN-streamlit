@@ -134,6 +134,7 @@ def load_models():
 
 def transform_image(image):
     transform = transforms.Compose([
+        transforms.Resize((img_height, img_width), Image.LANCZOS),
         transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
