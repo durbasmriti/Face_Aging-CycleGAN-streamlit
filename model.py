@@ -197,8 +197,8 @@ input_shape = (3, 40, 40)
 G_AB = GeneratorResNet(input_shape).to(device)
 G_BA = GeneratorResNet(input_shape).to(device)
 
-G_AB.load_state_dict(torch.load(model_paths['G_AB_99.pth'], map_location=device))
-G_BA.load_state_dict(torch.load(model_paths['G_BA_99.pth'], map_location=device))
+    G_AB.load_state_dict(torch.load("G_AB_99.pth", map_location=device), strict=False)
+    G_BA.load_state_dict(torch.load("G_BA_99.pth", map_location=device), strict=False)
 
 G_AB.eval()
 G_BA.eval()
