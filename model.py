@@ -26,7 +26,7 @@ class ResidualBlock(nn.Module):
         )
 
     def forward(self, x):
-        return x + self.block(x) # Adds the shortcut/bypass connection
+        return x + self.block(x)
 
 class GeneratorResNet(nn.Module):
     def __init__(self, input_shape, num_residual_blocks=9):
@@ -135,7 +135,7 @@ G_AB, G_BA, D_A, D_B = load_models()
 
 def transform_image(image):
     transform = transforms.Compose([
-        transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
+        transforms.ColorJitter(brightness=0.1, contrast=0.5, saturation=0.1, hue=0.1),
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         
