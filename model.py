@@ -99,18 +99,23 @@ class Discriminator(nn.Module):
 
     def forward(self, img):
         return self.model(img)
-input_shape = (3, 256, 256)
+input_shape = (3, 200, 200)
 G_AB = GeneratorResNet(input_shape, num_residual_blocks=9)
 G_BA = GeneratorResNet(input_shape, num_residual_blocks=9)
 D_A = Discriminator(input_shape)
 D_B = Discriminator(input_shape)
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-G_AB = G_AB.to(device)
-G_BA = G_BA.to(device)
-D_A = D_A.to(device)
-D_B = D_B.to(device)
+gpu_flag = torch.cuda.is_available()
 
+if gpu_flag:
+    G_AB = G_AB.cuda()
+    G_BA = G_BA.cuda()
+    D_A = D_A.cuda()
+    D_B = D_B.cuda()
+    criterion_GAN.cuda()
+    criterion_cycle.cuda()
+    criterion_identity.cuda()
 # Load pre-trained weights
 try:
     state_dict_G_AB = torch.load("G_AB_99.pth", map_location=device)
@@ -147,13 +152,19 @@ try:
     print("Models loaded successfully!")
 except RuntimeError as e:
     print(f"Error loading model weights: {e}")
+    
+optimizer_G = torch.optim.Adam(itertools.chain(G_AB.parameters(), G_BA.parameters()), lr=lr, betas=(0.5, 0.999))
+optimizer_D_A = torch.optim.Adam(D_A.parameters(), lr=lr, betas=(0.5, 0.999))
+optimizer_D_B = torch.optim.Adam(D_B.parameters(), lr=lr, betas=(0.5, 0.999))
 
 # Define transformations
-transform = transforms.Compose([
-    transforms.Resize((input_shape[1], input_shape[2])),
+transforms_ = [
+    transforms.Resize(int(img_height * 1.12), Image.BICUBIC),
+    transforms.RandomCrop((img_height, img_width)),
+    transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
-    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-])
+    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+]
 
 st.title("Image Aging with CycleGAN")
 
