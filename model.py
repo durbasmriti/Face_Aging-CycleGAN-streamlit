@@ -7,18 +7,7 @@ from PIL import Image
 import numpy as np
 import io
 import itertools
-n_epochs=100
-epoch=offset=0 
 
-decay_start_epoch=3
-input_shape = (3,40,40)
-c,img_height,img_width = input_shape
-batch_size = 100
-lr = 2e-4
-checkpoint_interval = 1
-sample_interval = 100
-lambda_cyc = 10
-lambda_id = 5
 class ResidualBlock(nn.Module):
     def __init__(self, in_features):
         super(ResidualBlock, self).__init__()
@@ -111,87 +100,45 @@ class Discriminator(nn.Module):
 
     def forward(self, img):
         return self.model(img)
-input_shape = (3, 200, 200)
-G_AB = GeneratorResNet(input_shape, num_residual_blocks=9)
-G_BA = GeneratorResNet(input_shape, num_residual_blocks=9)
-D_A = Discriminator(input_shape)
-D_B = Discriminator(input_shape)
+        
+def load_model():
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    input_shape = (3, 200, 200)
+    G_AB = GeneratorResNet(input_shape, num_residual_blocks=9).to(device)
+    G_AB.load_state_dict(torch.load("G_AB_99.pth", map_location=device))
+    G_AB.eval()
+    return G_AB
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-gpu_flag = torch.cuda.is_available()
 
-if gpu_flag:
-    G_AB = G_AB.cuda()
-    G_BA = G_BA.cuda()
-    D_A = D_A.cuda()
-    D_B = D_B.cuda()
-    criterion_GAN.cuda()
-    criterion_cycle.cuda()
-    criterion_identity.cuda()
-# Load pre-trained weights
-try:
-    state_dict_G_AB = torch.load("G_AB_99.pth", map_location=device)
-    state_dict_G_BA = torch.load("G_BA_99.pth", map_location=device)
-    state_dict_D_A = torch.load("D_A_99.pth", map_location=device)
-    state_dict_D_B = torch.load("D_B_99.pth", map_location=device)
-    
-    # Print model and state dict keys for debugging
-    print("Model G_AB keys:")
-    print([key for key, _ in G_AB.named_parameters()])
-    print("State dict keys for G_AB:")
-    print(state_dict_G_AB.keys())
-    
-    print("Model G_BA keys:")
-    print([key for key, _ in G_BA.named_parameters()])
-    print("State dict keys for G_BA:")
-    print(state_dict_G_BA.keys())
-    
-    print("Model D_A keys:")
-    print([key for key, _ in D_A.named_parameters()])
-    print("State dict keys for D_A:")
-    print(state_dict_D_A.keys())
-    
-    print("Model D_B keys:")
-    print([key for key, _ in D_B.named_parameters()])
-    print("State dict keys for D_B:")
-    print(state_dict_D_B.keys())
-    
-    # Load state dictionaries into models
-    G_AB.load_state_dict(state_dict_G_AB)
-    G_BA.load_state_dict(state_dict_G_BA)
-    D_A.load_state_dict(state_dict_D_A)
-    D_B.load_state_dict(state_dict_D_B)
-    print("Models loaded successfully!")
-except RuntimeError as e:
-    print(f"Error loading model weights: {e}")
-    
-optimizer_G = torch.optim.Adam(itertools.chain(G_AB.parameters(), G_BA.parameters()), lr=lr, betas=(0.5, 0.999))
-optimizer_D_A = torch.optim.Adam(D_A.parameters(), lr=lr, betas=(0.5, 0.999))
-optimizer_D_B = torch.optim.Adam(D_B.parameters(), lr=lr, betas=(0.5, 0.999))
 
-# Define transformations
-transform_pipeline = transforms.Compose([
-    transforms.Resize(int(img_height * 1.12), Image.BICUBIC),
-    transforms.RandomCrop((img_height, img_width)),
-    transforms.RandomHorizontalFlip(),
-    transforms.ToTensor(),
-    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-])
+def transform_image(image):
+    transform = transforms.Compose([
+        transforms.Resize((200, 200)),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
+    return transform(image).unsqueeze(0)
 
-st.title("Image Aging with CycleGAN")
+def generate_image(model, image_tensor):
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    image_tensor = image_tensor.to(device)
+    with torch.no_grad():
+        fake_image = model(image_tensor)
+    return fake_image
+
+st.title('CycleGAN Age Transformation')
+st.write('Upload an image to transform it to an aged version.')
+
+model = load_model()
 
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
-
 if uploaded_file is not None:
-    image = Image.open(uploaded_file).convert("RGB")
+    image = Image.open(uploaded_file).convert('RGB')
     st.image(image, caption='Uploaded Image', use_column_width=True)
-    
-    image_tensor = transform_pipeline(image).unsqueeze(0).to(device)
-    with torch.no_grad():
-        aged_image_tensor = G_AB(image_tensor)
-    
-    aged_image = aged_image_tensor.squeeze(0).cpu().detach()
-    aged_image = transforms.ToPILImage()(aged_image * 0.5 + 0.5)
 
-    st.image(aged_image, caption='Aged Image', use_column_width=True)
+    image_tensor = transform_image(image)
+    fake_image_tensor = generate_image(model, image_tensor)
+    fake_image_tensor = fake_image_tensor.squeeze().cpu().detach()
+    fake_image = transforms.ToPILImage()(fake_image_tensor)
 
+    st.image(fake_image, caption='Aged Image', use_column_width=True)
