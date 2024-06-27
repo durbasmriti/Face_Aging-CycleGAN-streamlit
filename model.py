@@ -7,6 +7,7 @@ from PIL import Image
 import numpy as np
 import io
 import itertools
+c,img_height,img_width = input_shape
 
 class ResidualBlock(nn.Module):
     def __init__(self, in_features):
