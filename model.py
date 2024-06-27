@@ -101,14 +101,26 @@ class Discriminator(nn.Module):
     def forward(self, img):
         return self.model(img)
         
-def load_model():
+def load_models():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     input_shape = (3, 200, 200)
-    G_AB = GeneratorResNet(input_shape, num_residual_blocks=9).to(device)
-    G_AB.load_state_dict(torch.load("G_AB_99.pth", map_location=device))
-    G_AB.eval()
-    return G_AB
 
+    G_AB = GeneratorResNet(input_shape, num_residual_blocks=9).to(device)
+    G_BA = GeneratorResNet(input_shape, num_residual_blocks=9).to(device)
+    D_A = Discriminator(input_shape).to(device)
+    D_B = Discriminator(input_shape).to(device)
+
+    G_AB.load_state_dict(torch.load("G_AB_99.pth", map_location=device), strict=False)
+    G_BA.load_state_dict(torch.load("G_BA_99.pth", map_location=device), strict=False)
+    D_A.load_state_dict(torch.load("D_A_99.pth", map_location=device), strict=False)
+    D_B.load_state_dict(torch.load("D_B_99.pth", map_location=device), strict=False)
+
+    G_AB.eval()
+    G_BA.eval()
+    D_A.eval()
+    D_B.eval()
+
+    return G_AB, G_BA, D_A, D_B
 
 
 def transform_image(image):
@@ -129,7 +141,7 @@ def generate_image(model, image_tensor):
 st.title('CycleGAN Age Transformation')
 st.write('Upload an image to transform it to an aged version.')
 
-model = load_model()
+G_AB, G_BA, D_A, D_B = load_models()
 
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 if uploaded_file is not None:
