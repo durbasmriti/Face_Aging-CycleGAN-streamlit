@@ -130,7 +130,8 @@ def load_models():
     D_B.eval()
 
     return G_AB, G_BA, D_A, D_B
-
+    
+G_AB, G_BA, D_A, D_B = load_models()
 
 def transform_image(image):
     transform = transforms.Compose([
@@ -147,12 +148,7 @@ def generate_image(model, image_tensor):
     with torch.no_grad():
         fake_image = model(image_tensor)
     return fake_image
-
-st.title('CycleGAN Age Transformation')
-st.write('Upload an image to transform it to an aged version.')
-
-G_AB, G_BA, D_A, D_B = load_models()
-
+    
 from PIL import ImageFilter
 
 def sharpen_image(image):
@@ -164,6 +160,9 @@ def save_image_tensor(image_tensor, file_name):
     image = transforms.ToPILImage()(image_tensor)
     image = sharpen_image(image)  # Apply sharpening filter
     image.save(file_name)
+
+st.title('CycleGAN Age Transformation')
+st.write('Upload an image to transform it to an aged version.')
 
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 if uploaded_file is not None:
