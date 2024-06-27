@@ -25,8 +25,15 @@ class ResidualBlock(nn.Module):
 
 class GeneratorResNet(nn.Module):
     def __init__(self, input_shape, num_residual_blocks=9):
+        '''
+        input_shape : Tensor in (C,H,W) Format
+        num_residual_blocks : Number of Residual blocks
+        '''
         super(GeneratorResNet, self).__init__()
+
         channels = input_shape[0]
+
+        # Initial convolution block
         out_features = 64
         model = [
             nn.ReflectionPad2d(channels),
@@ -36,6 +43,7 @@ class GeneratorResNet(nn.Module):
         ]
         in_features = out_features
 
+        # Downsampling
         for _ in range(2):
             out_features *= 2
             model += [
@@ -45,9 +53,11 @@ class GeneratorResNet(nn.Module):
             ]
             in_features = out_features
 
+        # Residual blocks
         for _ in range(num_residual_blocks):
             model += [ResidualBlock(out_features)]
 
+        # Upsampling
         for _ in range(2):
             out_features //= 2
             model += [
@@ -58,8 +68,10 @@ class GeneratorResNet(nn.Module):
             ]
             in_features = out_features
 
+        # Output layer
         model += [nn.ReflectionPad2d(channels), nn.Conv2d(out_features, channels, 7), nn.Tanh()]
-        self.model = nn.Sequential(*model)
+
+        self.model = nn.Sequential(*model) #Build Sequential model by list unpacking
 
     def forward(self, x):
         return self.model(x)
