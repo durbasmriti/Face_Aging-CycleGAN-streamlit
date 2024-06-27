@@ -135,7 +135,6 @@ G_AB, G_BA, D_A, D_B = load_models()
 
 def transform_image(image):
     transform = transforms.Compose([
-        transforms.Resize(int(img_height * 1.12), Image.BICUBIC),
         transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
