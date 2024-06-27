@@ -1,1 +1,4 @@
-
+steramlit
+torch
+torchvision
+pillow
