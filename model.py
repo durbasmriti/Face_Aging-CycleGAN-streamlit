@@ -140,7 +140,7 @@ def transform_image(image):
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         
     ])
-    return transform(image).unsqueeze(0)
+    return transform(image)
 
 def generate_image(model, image_tensor):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
