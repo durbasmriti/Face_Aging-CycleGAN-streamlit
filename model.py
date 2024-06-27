@@ -73,11 +73,17 @@ transform = transforms.Compose([
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-G_AB = GeneratorResNet(input_shape, num_residual_blocks=9).to(device)
-G_AB.load_state_dict(torch.load("G_AB_99.pth", map_location=device))
+num_residual_blocks = 9
 
-G_BA = GeneratorResNet(input_shape, num_residual_blocks=9).to(device)
-G_BA.load_state_dict(torch.load("G_BA_99.pth", map_location=device))
+G_AB = GeneratorResNet(input_shape, num_residual_blocks=num_residual_blocks).to(device)
+G_BA = GeneratorResNet(input_shape, num_residual_blocks=num_residual_blocks).to(device)
+
+try:
+    G_AB.load_state_dict(torch.load("G_AB_99.pth", map_location=device))
+    G_BA.load_state_dict(torch.load("G_BA_99.pth", map_location=device))
+    st.success("Models loaded successfully!")
+except RuntimeError as e:
+    st.error(f"Error loading model weights: {e}")
 
 st.title("Image Aging with CycleGAN")
 
