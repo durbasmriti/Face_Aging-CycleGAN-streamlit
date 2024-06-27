@@ -137,11 +137,10 @@ def load_models():
 def transform_image(image):
     transform = transforms.Compose([
         transforms.Resize(int(img_height * 1.12), Image.BICUBIC),
-        transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
-    return transform(image).unsqueeze(0)
+    return transform(image).unsqueeze(1)
 
 def generate_image(model, image_tensor):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
