@@ -137,6 +137,7 @@ def load_models():
 def transform_image(image):
     transform = transforms.Compose([
         transforms.Resize(int(img_height * 1.12), Image.BICUBIC),
+        transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
