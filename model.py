@@ -8,6 +8,8 @@ import numpy as np
 import io
 import itertools
 
+input_shape = (3,40,40)
+c,img_height,img_width = input_shape
 
 class ResidualBlock(nn.Module):
     def __init__(self, in_features):
@@ -130,7 +132,7 @@ def load_models():
     D_B.eval()
 
     return G_AB, G_BA, D_A, D_B
-c,img_height,img_width = input_shape
+
 
 def transform_image(image):
     transform = transforms.Compose([
