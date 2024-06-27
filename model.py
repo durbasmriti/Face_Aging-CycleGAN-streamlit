@@ -75,27 +75,85 @@ class GeneratorResNet(nn.Module):
 
     def forward(self, x):
         return self.model(x)
+        
+class Discriminator(nn.Module):
+    def __init__(self, input_shape):
+        super(Discriminator, self).__init__()
+        channels, height, width = input_shape
+        self.output_shape = (1, height // 2 ** 4, width // 2 ** 4)
+        self.model = nn.Sequential(
+            *self.discriminator_block(channels, 64, normalize=False),
+            *self.discriminator_block(64, 128),
+            *self.discriminator_block(128, 256),
+            *self.discriminator_block(256, 512),
+            nn.ZeroPad2d((1, 0, 1, 0)),
+            nn.Conv2d(512, 1, 4, padding=1)
+        )
 
+    def discriminator_block(self, in_filters, out_filters, normalize=True):
+        layers = [nn.Conv2d(in_filters, out_filters, 4, stride=2, padding=1)]
+        if normalize:
+            layers.append(nn.InstanceNorm2d(out_filters))
+        layers.append(nn.LeakyReLU(0.2, inplace=True))
+        return layers
+
+    def forward(self, img):
+        return self.model(img)
 input_shape = (3, 256, 256)
+G_AB = GeneratorResNet(input_shape, num_residual_blocks=9)
+G_BA = GeneratorResNet(input_shape, num_residual_blocks=9)
+D_A = Discriminator(input_shape)
+D_B = Discriminator(input_shape)
+
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+G_AB = G_AB.to(device)
+G_BA = G_BA.to(device)
+D_A = D_A.to(device)
+D_B = D_B.to(device)
+
+# Load pre-trained weights
+try:
+    state_dict_G_AB = torch.load("G_AB_99.pth", map_location=device)
+    state_dict_G_BA = torch.load("G_BA_99.pth", map_location=device)
+    state_dict_D_A = torch.load("D_A_99.pth", map_location=device)
+    state_dict_D_B = torch.load("D_B_99.pth", map_location=device)
+    
+    # Print model and state dict keys for debugging
+    print("Model G_AB keys:")
+    print([key for key, _ in G_AB.named_parameters()])
+    print("State dict keys for G_AB:")
+    print(state_dict_G_AB.keys())
+    
+    print("Model G_BA keys:")
+    print([key for key, _ in G_BA.named_parameters()])
+    print("State dict keys for G_BA:")
+    print(state_dict_G_BA.keys())
+    
+    print("Model D_A keys:")
+    print([key for key, _ in D_A.named_parameters()])
+    print("State dict keys for D_A:")
+    print(state_dict_D_A.keys())
+    
+    print("Model D_B keys:")
+    print([key for key, _ in D_B.named_parameters()])
+    print("State dict keys for D_B:")
+    print(state_dict_D_B.keys())
+    
+    # Load state dictionaries into models
+    G_AB.load_state_dict(state_dict_G_AB)
+    G_BA.load_state_dict(state_dict_G_BA)
+    D_A.load_state_dict(state_dict_D_A)
+    D_B.load_state_dict(state_dict_D_B)
+    print("Models loaded successfully!")
+except RuntimeError as e:
+    print(f"Error loading model weights: {e}")
+
+# Define transformations
 transform = transforms.Compose([
     transforms.Resize((input_shape[1], input_shape[2])),
     transforms.ToTensor(),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 ])
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-num_residual_blocks = 9
-
-G_AB = GeneratorResNet(input_shape, num_residual_blocks=num_residual_blocks).to(device)
-G_BA = GeneratorResNet(input_shape, num_residual_blocks=num_residual_blocks).to(device)
-
-try:
-    G_AB.load_state_dict(torch.load("G_AB_99.pth", map_location=device))
-    G_BA.load_state_dict(torch.load("G_BA_99.pth", map_location=device))
-    st.success("Models loaded successfully!")
-except RuntimeError as e:
-    st.error(f"Error loading model weights: {e}")
 
 st.title("Image Aging with CycleGAN")
 
