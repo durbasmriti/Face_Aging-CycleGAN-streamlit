@@ -29,7 +29,7 @@ class ResidualBlock(nn.Module):
         return x + self.block(x) # Adds the shortcut/bypass connection
 
 class GeneratorResNet(nn.Module):
-    def __init__(self, input_shape, num_residual_blocks=15):
+    def __init__(self, input_shape, num_residual_blocks=12):
         '''
         input_shape : Tensor in (C,H,W) Format
         num_residual_blocks : Number of Residual blocks
