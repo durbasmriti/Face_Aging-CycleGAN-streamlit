@@ -169,8 +169,8 @@ if uploaded_file is not None:
     st.image(image, caption='Uploaded Image', use_column_width=True)
 
     image_tensor = transform_image(image)
-    # save_image_tensor(image_tensor, 'transformed_image.jpg')
-    # st.image('transformed_image.jpg', caption='Transformed Image', use_column_width=True)
+    save_image_tensor(image_tensor, 'transformed_image.jpg')
+    st.image('transformed_image.jpg', caption='Transformed Image', use_column_width=True)
 
     fake_image_tensor = generate_image(G_AB, image_tensor)
     save_image_tensor(fake_image_tensor, 'generated_image.jpg')
