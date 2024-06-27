@@ -149,7 +149,7 @@ if uploaded_file is not None:
     st.image(image, caption='Uploaded Image', use_column_width=True)
 
     image_tensor = transform_image(image)
-    fake_image_tensor = generate_image(model, image_tensor)
+    fake_image_tensor = generate_image(G_AB, image_tensor)
     fake_image_tensor = fake_image_tensor.squeeze().cpu().detach()
     fake_image = transforms.ToPILImage()(fake_image_tensor)
 
