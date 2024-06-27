@@ -134,7 +134,6 @@ def load_models():
 
 def transform_image(image):
     transform = transforms.Compose([
-        transforms.Resize((img_height, img_width), Image.LANCZOS),
         transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
@@ -172,8 +171,19 @@ if uploaded_file is not None:
     st.image(image, caption='Uploaded Image', use_column_width=True)
 
     image_tensor = transform_image(image)
-    fake_image_tensor = generate_image(G_AB, image_tensor)
-    fake_image_tensor = fake_image_tensor.squeeze().cpu().detach()
-    fake_image = transforms.ToPILImage()(fake_image_tensor)
+    transformed_image = save_image_tensor(image_tensor)
+    buf_transformed = io.BytesIO()
+    transformed_image.save(buf_transformed, format="JPEG")
+    byte_im_transformed = buf_transformed.getvalue()
 
-    st.image(fake_image, caption='Aged Image', use_column_width=True)
+    st.image(transformed_image, caption='Transformed Image', use_column_width=True)
+    st.download_button(label="Download Transformed Image", data=byte_im_transformed, file_name="transformed_image.jpg", mime="image/jpeg")
+
+    fake_image_tensor = generate_image(G_AB, image_tensor)
+    aged_image = save_image_tensor(fake_image_tensor)
+    buf_aged = io.BytesIO()
+    aged_image.save(buf_aged, format="JPEG")
+    byte_im_aged = buf_aged.getvalue()
+
+    st.image(aged_image, caption='Aged Image', use_column_width=True)
+    st.download_button(label="Download Aged Image", data=byte_im_aged, file_name="aged_image.jpg", mime="image/jpeg")
