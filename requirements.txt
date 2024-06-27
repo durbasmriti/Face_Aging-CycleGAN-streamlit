@@ -1,4 +1,4 @@
-steramlit
-torch
-torchvision
-pillow
+streamlit==1.12.2
+torch==2.0.1
+torchvision==0.15.2
+Pillow==9.5.0
