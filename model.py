@@ -17,7 +17,6 @@ input_shape = (3,200,200)
 c,img_height,img_width = input_shape
 from torchvision.utils import make_grid
 
-# from torchinfo import summary
 Tensor=torch.Tensor
 class ResidualBlock(nn.Module):
     def __init__(self, in_features):
