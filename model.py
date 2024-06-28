@@ -148,16 +148,17 @@ def generate_image(model, image_tensor):
     with torch.no_grad():
         fake_image = model(image_tensor)
     return fake_image
-
+def sharpen_image(image):
+    return image.filter(ImageFilter.SHARPEN)
+    
 def save_image_tensor(image_tensor, file_name):
     image_tensor = image_tensor.squeeze().cpu().detach()
     image = transforms.ToPILImage()(image_tensor)
+    image = sharpen_image(image) 
     image.save(file_name)
 
 transforms_ = [
-    transforms.Resize(int(img_height * 1.12), Image.BICUBIC),
-    transforms.RandomCrop((img_height, img_width)),
-    transforms.RandomHorizontalFlip(),
+    transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
     transforms.ToTensor(),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
 ]
@@ -198,6 +199,8 @@ def sample_images(type):
 
 st.title('CycleGAN Age Transformation')
 st.write('Upload an image to transform it to an aged version.')
+
+
 
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 if uploaded_file is not None:
