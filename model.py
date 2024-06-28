@@ -129,10 +129,7 @@ def load_models():
     G_BA.load_state_dict(torch.load("G_BA_50.pth", map_location=device), strict=False)
     D_A.load_state_dict(torch.load("D_A_50.pth", map_location=device), strict=False)
     D_B.load_state_dict(torch.load("D_B_50.pth", map_location=device), strict=False)
-    # G_AB=torch.load("G_AB_80.pth", map_location=device)
-    # G_BA=torch.load("G_BA_80.pth", map_location=device)
-    # D_A=torch.load("D_A_80.pth", map_location=device)
-    # D_B=torch.load("D_B_80.pth", map_location=device)
+    
 
     G_AB.eval()
     G_BA.eval()
