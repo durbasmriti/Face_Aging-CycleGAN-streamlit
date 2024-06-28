@@ -6,7 +6,7 @@ from torchvision.utils import save_image
 from torch.utils.data import Dataset,DataLoader
 from torch.autograd import Variable
 
-from PIL import Image
+from PIL import Image , ImageFilter
 import numpy as np
 import io
 import itertools
