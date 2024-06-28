@@ -13,7 +13,7 @@ import itertools
 
 torch.manual_seed(123)
 device='cpu'
-input_shape = (3,200,200)
+input_shape = (3,40,40)
 c,img_height,img_width = input_shape
 from torchvision.utils import make_grid
 
@@ -125,10 +125,10 @@ def load_models():
     D_A = Discriminator(input_shape)
     D_B = Discriminator(input_shape)
 
-    G_AB.load_state_dict(torch.load("G_AB_50.pth", map_location=device), strict=False)
-    G_BA.load_state_dict(torch.load("G_BA_50.pth", map_location=device), strict=False)
-    D_A.load_state_dict(torch.load("D_A_50.pth", map_location=device), strict=False)
-    D_B.load_state_dict(torch.load("D_B_50.pth", map_location=device), strict=False)
+    G_AB.load_state_dict(torch.load("G_AB_99.pth", map_location=device), strict=False)
+    G_BA.load_state_dict(torch.load("G_BA_99.pth", map_location=device), strict=False)
+    D_A.load_state_dict(torch.load("D_A_99.pth", map_location=device), strict=False)
+    D_B.load_state_dict(torch.load("D_B_99.pth", map_location=device), strict=False)
     
 
     G_AB.eval()
