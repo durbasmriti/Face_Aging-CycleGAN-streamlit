@@ -10,6 +10,7 @@ from PIL import Image
 import numpy as np
 import io
 import itertools
+
 torch.manual_seed(123)
 device='cpu'
 input_shape = (3,200,200)
