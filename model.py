@@ -7,9 +7,12 @@ from PIL import Image
 import numpy as np
 import io
 import itertools
+import os
+from PIL import ImageFilter
+import matplotlib.pyplot as plt
 
-# input_shape = (3,40,40)
-# c,img_height,img_width = input_shape
+input_shape = (3,40,40)
+c,img_height,img_width = input_shape
 
 class ResidualBlock(nn.Module):
     def __init__(self, in_features):
@@ -112,6 +115,39 @@ class Discriminator(nn.Module):
     def forward(self, img):
         return self.model(img)
         
+class SingleImageDataset(Dataset):
+    def __init__(self, image, transform):
+        self.image = image
+        self.transform = transform
+
+    def __len__(self):
+        return 1
+
+    def __getitem__(self, idx):
+        return self.transform(self.image)
+        
+# class CycleGANDataset(Dataset):
+#     def __init__(self, root, transforms_=None, unaligned=False, mode="train"):
+#         self.transform = transforms.Compose(transforms_)
+#         self.unaligned = unaligned # used to handle cases when the number of images are not equal
+
+#         self.files_A = sorted(glob.glob(os.path.join(root, "%s/A" % mode) + "/*.*"))
+#         self.files_B = sorted(glob.glob(os.path.join(root, "%s/B" % mode) + "/*.*"))
+
+#     def __getitem__(self, index):
+#         image_A = Image.open(self.files_A[index % len(self.files_A)]) # Safe-indexing such that always withing the range
+
+#         if self.unaligned:
+#             image_B = Image.open(self.files_B[random.randint(0, len(self.files_B) - 1)])
+#         else:
+#             image_B = Image.open(self.files_B[index % len(self.files_B)])
+
+
+#         item_A = self.transform(image_A)
+#         item_B = self.transform(image_B)
+#         return {"A": item_A, "B": item_B}
+
+
 # def load_models():
 #     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 #     G_AB = GeneratorResNet(input_shape, num_residual_blocks=3)
@@ -149,7 +185,7 @@ class Discriminator(nn.Module):
 #         fake_image = model(image_tensor)
 #     return fake_image
     
-# from PIL import ImageFilter
+
 
 # def sharpen_image(image):
 #     return image.filter(ImageFilter.SHARPEN)
@@ -176,12 +212,7 @@ class Discriminator(nn.Module):
 #     save_image_tensor(fake_image_tensor, 'generated_image.jpg')
 #     st.image('generated_image.jpg', caption='Aged Image', use_column_width=True)
 
-import streamlit as st
-import torch
-from torchvision import transforms
-from PIL import Image
-import os
-import matplotlib.pyplot as plt
+
 
 # Define paths to the models
 # model_paths = {
@@ -193,7 +224,6 @@ import matplotlib.pyplot as plt
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Assuming you have the GeneratorResNet class defined as in your previous code
-input_shape = (3, 40, 40)
 G_AB = GeneratorResNet(input_shape).to(device)
 G_BA = GeneratorResNet(input_shape).to(device)
 
@@ -216,35 +246,22 @@ inverse_transform = transforms.Compose([
 ])
 
 # Streamlit UI
-st.title("CycleGAN Image Translation")
+st.title("CycleGAN Image Transformation")
 
 # File uploader
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    # Read the uploaded image
-    image = Image.open(uploaded_file).convert("RGB")
+    image = Image.open(uploaded_file).convert('RGB')
+    st.image(image, caption='Uploaded Image', use_column_width=True)
 
-    # Transform the image
-    transformed_image = transform(image).unsqueeze(0).to(device)
+    transformed_image = transform_image(image)
+    dataset = SingleImageDataset(image, transform_image)
+    dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
 
-    # Generate images
-    fake_B = G_AB(transformed_image).squeeze(0).cpu().detach()
-    fake_A = G_BA(transformed_image).squeeze(0).cpu().detach()
+    fake_image_tensor = generate_image(G_AB, dataloader)
+    fake_image_tensor = fake_image_tensor.squeeze().cpu().detach()
+    fake_image = transforms.ToPILImage()(fake_image_tensor)
 
-    # Inverse transform the images for display
-    fake_B_image = inverse_transform(fake_B)
-    fake_A_image = inverse_transform(fake_A)
-
-    # Display the original and transformed images
-    st.write("Original Image")
-    st.image(image, use_column_width=True)
-
-    st.write("Transformed Image (A -> B)")
-    st.image(fake_B_image, use_column_width=True)
-
-    st.write("Transformed Image (B -> A)")
-    st.image(fake_A_image, use_column_width=True)
-else:
-    st.write("Upload an image to see the translation results.")
+    st.image(fake_image, caption='Aged Image', use_column_width=True)
 
