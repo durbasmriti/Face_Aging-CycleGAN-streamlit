@@ -146,15 +146,6 @@ G_AB, G_BA, D_A, D_B = load_models()
 
 
 
-def transform_image(image):
-    transform = transforms.Compose([
-    transforms.Resize(int(img_height * 1.12), Image.BICUBIC),
-    transforms.RandomCrop((img_height, img_width)),
-    transforms.RandomHorizontalFlip(),
-    transforms.ToTensor(),
-    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-])
-    return transform(image).unsqueeze(0)
 
 def generate_image(model, image_tensor):
     image_tensor = image_tensor.to(device)
@@ -203,9 +194,9 @@ def sample_images(type):
     fake_A = make_grid(fake_A, nrow=1, normalize=True)
     fake_B = make_grid(fake_B, nrow=1, normalize=True)
     if type== 1:
-        return torch.cat((fake_B), 1)
+        return fake_B
     else:
-        return torch.cat((fake_A), 1)
+        return fake_A
     
 
 
